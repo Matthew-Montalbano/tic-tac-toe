@@ -13,6 +13,10 @@ const gameboard = (() => {
         }
     }
 
+    const update = (row, col, symbol) => {
+        gameboard[row][col] = symbol;
+    }
+
     const clearBoard = () => {
         for (let row = 0; row < 3; row++) {
             for (let col = 0; col < 3; col++) {
@@ -43,27 +47,41 @@ const gameboard = (() => {
         return false;
     }
 
-    return {populate, clearBoard, checkForWin};
+    return {populate, clearBoard, checkForWin, update};
 })();
 
 const Player = (name) => {
     this.name = name;
-    return {};
+    const play = (symbol) => {
+        const squares = document.querySelectorAll(".board-square");
+        squares.forEach(square => {
+            let squareValue = square.querySelector("h3").textContent;
+            if (squareValue == "") {
+                square.addEventListener("click", () => {
+                    let row = square.id.charAt(0);
+                    let col = square.id.charAt(1);
+                    gameboard.update(row, col, symbol);
+                    gameboard.populate();
+                });
+            }
+        });
+    }
+    return {play};
 }
 
-const playGame = () => {
+const PlayGame = () => {
     const play = () => {
         gameboard.clearBoard();
         const playerOne = getPlayer("one");
         const playerTwo = getPlayer("two");
         let numTurns = 0;
         while (numTurns < 9) {
-            playerOne.play();
+            playerOne.play("x");
             if (gameboard.checkForWin()) {
                 //playerone wins popup
                 break;
             }
-            playerTwo.play();
+            playerTwo.play("o");
             if (gameboard.checkForWin()) {
                 //playertwo wins popup
                 break;
@@ -73,9 +91,11 @@ const playGame = () => {
 
     const getPlayer = (playerNumber) => {
         const player = prompt("What is player " + playerNumber + "'s name?");
-        return player;
+        return Player(player);
     }
-    return {};
+    return {play};
 }
 
 gameboard.populate();
+const game = PlayGame();
+game.play();
