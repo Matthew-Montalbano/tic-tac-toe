@@ -44,46 +44,57 @@ const gameboard = (() => {
 
 const Player = (name) => {
     this.name = name;
-    const play = (symbol) => {
-        const squares = document.querySelectorAll(".board-square");
-        squares.forEach(square => {
-            let squareValue = square.querySelector("h3").textContent;
-            if (squareValue == "") {
-                square.addEventListener("click", () => {
-                    let row = square.id.charAt(0);
-                    let col = square.id.charAt(1);
-                    gameboard.update(row, col, symbol);
-                    displayController.displayGameboard();
-                    game.nextTurn();
-                });
-            }
-        });
-    }
-    return {play};
+    return {};
 }
 
 const PlayGame = () => {
     this.numTurns = 0;
     this.playerOne;
     this.playerTwo;
+    this.currentPlayer;
 
     const play = () => {
         numTurns = 0;
         gameboard.clearBoard();
-        playerOne = getPlayer("one");
-        playerTwo = getPlayer("two");
+        playerOne = Player('a');
+        playerTwo = Player('a');
+        currentPlayer = playerTwo;
+        setClickListeners();
         nextTurn();
     }
 
     const nextTurn = () => {
+        numTurns++;
         if (numTurns >= 9) {
             //tie
-        } else if (numTurns % 2 == 0) {
-            playerOne.play("x");
-        } else {
-            playerTwo.play("o");
         }
-        numTurns++;
+        if (currentPlayer == playerOne) {
+            currentPlayer = playerTwo;
+        } else {
+            currentPlayer = playerOne;
+        }
+    }
+
+    const setClickListeners = () => {
+        const squares = document.querySelectorAll(".board-square");
+        squares.forEach(square => {
+            let squareValue = square.querySelector("h3").textContent;
+            if (squareValue == "") {
+                square.addEventListener("click", () => {fillPosition(square)}, {once: true});
+            }
+        });
+    }
+    
+    const fillPosition = (square) => {
+        let row = square.id.charAt(0);
+        let col = square.id.charAt(1);
+        if (currentPlayer == playerOne) {
+            gameboard.update(row, col, "x");
+        } else {
+            gameboard.update(row, col, "o");
+        }
+        displayController.displayGameboard();
+        nextTurn();
     }
 
     const getPlayer = (playerNumber) => {
