@@ -1,16 +1,8 @@
 const gameboard = (() => {
     const gameboard = [["", "", ""], ["", "", ""], ["", "", ""]];
-    const populate = () => {
-        const htmlRows = document.querySelectorAll(".board-row");
-        for (let row = 0; row < gameboard.length; row++) {
-            let htmlRow = htmlRows[row];
-            let htmlSquares = htmlRow.querySelectorAll(".board-square");
-            for (let square = 0; square < gameboard[row].length; square++) {
-                let htmlSquare = htmlSquares[square];
-                let squareValue = htmlSquare.querySelector("h3"); 
-                squareValue.textContent = gameboard[row][square];
-            }
-        }
+
+    const getBoard = () => {
+        return gameboard;
     }
 
     const update = (row, col, symbol) => {
@@ -47,7 +39,7 @@ const gameboard = (() => {
         return false;
     }
 
-    return {populate, clearBoard, checkForWin, update};
+    return {getBoard, clearBoard, checkForWin, update};
 })();
 
 const Player = (name) => {
@@ -61,7 +53,8 @@ const Player = (name) => {
                     let row = square.id.charAt(0);
                     let col = square.id.charAt(1);
                     gameboard.update(row, col, symbol);
-                    gameboard.populate();
+                    displayController.displayGameboard();
+                    game.nextTurn();
                 });
             }
         });
@@ -70,32 +63,58 @@ const Player = (name) => {
 }
 
 const PlayGame = () => {
+    this.numTurns = 0;
+    this.playerOne;
+    this.playerTwo;
+
     const play = () => {
+        numTurns = 0;
         gameboard.clearBoard();
-        const playerOne = getPlayer("one");
-        const playerTwo = getPlayer("two");
-        let numTurns = 0;
-        while (numTurns < 9) {
+        playerOne = getPlayer("one");
+        playerTwo = getPlayer("two");
+        nextTurn();
+    }
+
+    const nextTurn = () => {
+        if (numTurns >= 9) {
+            //tie
+        } else if (numTurns % 2 == 0) {
             playerOne.play("x");
-            if (gameboard.checkForWin()) {
-                //playerone wins popup
-                break;
-            }
+        } else {
             playerTwo.play("o");
-            if (gameboard.checkForWin()) {
-                //playertwo wins popup
-                break;
-            }
         }
+        numTurns++;
     }
 
     const getPlayer = (playerNumber) => {
         const player = prompt("What is player " + playerNumber + "'s name?");
         return Player(player);
     }
-    return {play};
+    return {play, nextTurn};
 }
 
-gameboard.populate();
+const displayController = (() => {
+    const displayGameboard = () => {
+        const board = gameboard.getBoard();
+        const htmlRows = document.querySelectorAll(".board-row");
+        for (let row = 0; row < board.length; row++) {
+            let htmlRow = htmlRows[row];
+            let htmlSquares = htmlRow.querySelectorAll(".board-square");
+            for (let square = 0; square < board[row].length; square++) {
+                let htmlSquare = htmlSquares[square];
+                let squareValue = htmlSquare.querySelector("h3"); 
+                squareValue.textContent = board[row][square];
+            }
+        }
+    }
+
+    const ShowPlayerPrompt = () => {
+        return;
+    };
+
+    return {displayGameboard, ShowPlayerPrompt};
+})();
+
+displayController.displayGameboard();
 const game = PlayGame();
 game.play();
