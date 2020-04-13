@@ -19,20 +19,21 @@ const gameboard = (() => {
 
     const checkForWin = () => {
         for (let rowNum = 0; rowNum < 3; rowNum++) {
-            let row = gameboard[rowNum]
-            if ((row[0] == row[1]) && (row[1] == row[2])) {
+            let row = gameboard[rowNum];
+            if ((row[0] != "") && (row[0] == row[1]) && (row[1] == row[2])) {
                 return true;
             }
         }
 
         for (let col = 0; col < 3; col++) {
-            if ((gameboard[0][col] == gameboard[1][col]) && (gameboard[1][col] == gameboard[2][col])) {
+            if ((gameboard[0][col] != "") && (gameboard[0][col] == gameboard[1][col]) && (gameboard[1][col] == gameboard[2][col])) {
                 return true;
             }
         }
 
-        if (((gameboard[0][0] == gameboard[1][1]) && (gameboard[1][1] == gameboard[2][2])) ||
-            ((gameboard[0][2] == gameboard[1][1]) && (gameboard[1][1] == gameboard[2][0]))) {
+        if ((gameboard[1][1] != "") && (
+            ((gameboard[0][0] == gameboard[1][1]) && (gameboard[1][1] == gameboard[2][2])) ||
+            ((gameboard[0][2] == gameboard[1][1]) && (gameboard[1][1] == gameboard[2][0])))) {
                 return true;
             }
 
@@ -42,9 +43,10 @@ const gameboard = (() => {
     return {getBoard, clearBoard, checkForWin, update};
 })();
 
-const Player = (name) => {
+const Player = (name, symbol) => {
     this.name = name;
-    return {};
+    this.symbol = symbol;
+    return {name, symbol};
 }
 
 const PlayGame = () => {
@@ -56,17 +58,32 @@ const PlayGame = () => {
     const play = () => {
         numTurns = 0;
         gameboard.clearBoard();
-        playerOne = Player('a');
-        playerTwo = Player('a');
         currentPlayer = playerTwo;
         setClickListeners();
         nextTurn();
     }
 
+    const startGame = () => {
+        addPlayers();
+    }
+
+    const addPlayers = () => {
+        if (typeof playerOne == "undefined") {
+            playerOne = getPlayerInformation("one");
+        } else if (typeof playerTwo == "undefined") {
+            playerTwo = getPlayerInformation("two");
+            displayController.hidePlayerPrompt();
+            play();
+        }
+    }
+
     const nextTurn = () => {
         numTurns++;
-        if (numTurns >= 9) {
-            //tie
+        if (gameboard.checkForWin()) {
+            console.log(currentPlayer);
+        }
+        if (numTurns > 9) {
+            console.log("tie");
         }
         if (currentPlayer == playerOne) {
             currentPlayer = playerTwo;
@@ -89,19 +106,21 @@ const PlayGame = () => {
         let row = square.id.charAt(0);
         let col = square.id.charAt(1);
         if (currentPlayer == playerOne) {
-            gameboard.update(row, col, "x");
+            gameboard.update(row, col, playerOne.symbol);
         } else {
-            gameboard.update(row, col, "o");
+            gameboard.update(row, col, playerTwo.symbol);
         }
         displayController.displayGameboard();
         nextTurn();
     }
 
-    const getPlayer = (playerNumber) => {
-        const player = prompt("What is player " + playerNumber + "'s name?");
-        return Player(player);
+    const getPlayerInformation = (playerNumber) => {
+        const name = document.querySelector("#player-name").value;
+        console.log(document.querySelector('input[name="player-symbol"]'));
+        const symbol = document.querySelector('input[name="player-symbol"]:checked').value;
+        return Player(name, symbol);
     }
-    return {play, nextTurn};
+    return {startGame, addPlayers, play, nextTurn};
 }
 
 const displayController = (() => {
@@ -119,13 +138,27 @@ const displayController = (() => {
         }
     }
 
-    const ShowPlayerPrompt = () => {
-        return;
+    const showPlayerPrompt = () => {
+        const playerForm = document.querySelector(".player-information");
+        playerForm.style.display = "flex";
     };
 
-    return {displayGameboard, ShowPlayerPrompt};
+    const hidePlayerPrompt = () => {
+        const playerForm = document.querySelector(".player-information");
+        playerForm.style.display = "none";
+    }
+
+    return {displayGameboard, showPlayerPrompt, hidePlayerPrompt};
 })();
 
+const startButton = document.querySelector(".start-game");
+startButton.addEventListener("click", () => {displayController.showPlayerPrompt()});
+const submitPlayerInfo = document.querySelector(".submit-player");
 displayController.displayGameboard();
 const game = PlayGame();
-game.play();
+submitPlayerInfo.addEventListener("click", () => {
+    game.addPlayers();
+    const nameInput = document.querySelector("#player-name");
+    nameInput.value = "";
+});
+//game.startGame();
