@@ -43,85 +43,104 @@ const gameboard = (() => {
     return {getBoard, clearBoard, checkForWin, update};
 })();
 
+
+
 const Player = (name, symbol) => {
     this.name = name;
     this.symbol = symbol;
     return {name, symbol};
 }
 
+
+
 const PlayGame = () => {
-    this.numTurns = 0;
-    this.playerOne;
-    this.playerTwo;
-    this.currentPlayer;
+    numTurns = 0;
+    playerOne = null;
+    playerTwo = null;
+    currentPlayer = null;
+
+    const startGame = () => {
+        gameboard.clearBoard();
+        displayController.showPlayerPrompt("One");
+        displayController.displayGameboard();
+        const submitPlayerInfo = document.querySelector(".submit-player");
+        submitPlayerInfo.addEventListener("click", addPlayers);
+    }
+
+    const addPlayers = () => {
+        if (playerOne == null) {
+            playerOne = getPlayerInformation();
+            displayController.clearPlayerPrompt();
+            displayController.showPlayerPrompt("Two");
+        } else if (playerTwo == null) {
+            playerTwo = getPlayerInformation();
+            displayController.hidePlayerPrompt();
+            displayController.clearPlayerPrompt();
+            document.querySelector(".submit-player").removeEventListener("click", addPlayers);
+            play();
+        }
+    }
+
+    const getPlayerInformation = () => {
+        const name = document.querySelector("#player-name").value;
+        const symbol = document.querySelector('input[name="player-symbol"]:checked').value;
+        return Player(name, symbol);
+    }
 
     const play = () => {
-        numTurns = 0;
-        gameboard.clearBoard();
         currentPlayer = playerTwo;
         setClickListeners();
         nextTurn();
     }
 
-    const startGame = () => {
-        addPlayers();
+    const setClickListeners = () => {
+        const squares = document.querySelectorAll(".board-square");
+        squares.forEach(square => {
+            square.addEventListener("click", fillPosition, {once: true});
+        });
     }
 
-    const addPlayers = () => {
-        if (typeof playerOne == "undefined") {
-            playerOne = getPlayerInformation("one");
-        } else if (typeof playerTwo == "undefined") {
-            playerTwo = getPlayerInformation("two");
-            displayController.hidePlayerPrompt();
-            play();
-        }
+    const fillPosition = (event) => {
+        const squareID = event.target.id;
+        let row = squareID.charAt(0);
+        let col = squareID.charAt(1);
+        gameboard.update(row, col, currentPlayer.symbol);
+        displayController.displayGameboard();
+        nextTurn();
     }
 
     const nextTurn = () => {
         numTurns++;
         if (gameboard.checkForWin()) {
-            console.log(currentPlayer);
+            removeClickListeners();
+            displayController.displayWinner(currentPlayer);
+            return;
         }
         if (numTurns > 9) {
-            console.log("tie");
+            removeClickListeners();
+            displayController.displayTie();
+            return;
         }
         if (currentPlayer == playerOne) {
             currentPlayer = playerTwo;
         } else {
             currentPlayer = playerOne;
         }
+        displayController.displayCurrentPlayer(currentPlayer);
     }
 
-    const setClickListeners = () => {
+    const removeClickListeners = () => {
         const squares = document.querySelectorAll(".board-square");
         squares.forEach(square => {
-            let squareValue = square.querySelector("h3").textContent;
-            if (squareValue == "") {
-                square.addEventListener("click", () => {fillPosition(square)}, {once: true});
-            }
+            console.log('a');
+            square.removeEventListener("click", fillPosition);
         });
     }
-    
-    const fillPosition = (square) => {
-        let row = square.id.charAt(0);
-        let col = square.id.charAt(1);
-        if (currentPlayer == playerOne) {
-            gameboard.update(row, col, playerOne.symbol);
-        } else {
-            gameboard.update(row, col, playerTwo.symbol);
-        }
-        displayController.displayGameboard();
-        nextTurn();
-    }
 
-    const getPlayerInformation = (playerNumber) => {
-        const name = document.querySelector("#player-name").value;
-        console.log(document.querySelector('input[name="player-symbol"]'));
-        const symbol = document.querySelector('input[name="player-symbol"]:checked').value;
-        return Player(name, symbol);
-    }
-    return {startGame, addPlayers, play, nextTurn};
+    return {startGame};
 }
+
+
 
 const displayController = (() => {
     const displayGameboard = () => {
@@ -138,8 +157,9 @@ const displayController = (() => {
         }
     }
 
-    const showPlayerPrompt = () => {
+    const showPlayerPrompt = (playerNumber) => {
         const playerForm = document.querySelector(".player-information");
+        playerForm.querySelector("h2").textContent = "Player " + playerNumber + "'s Info";
         playerForm.style.display = "flex";
     };
 
@@ -148,17 +168,38 @@ const displayController = (() => {
         playerForm.style.display = "none";
     }
 
-    return {displayGameboard, showPlayerPrompt, hidePlayerPrompt};
+    const clearPlayerPrompt = () => {
+        const nameInput = document.querySelector("#player-name");
+        nameInput.value = "";
+    }
+
+    const displayCurrentPlayer = (player) => {
+        const currentPlayerText = document.querySelector(".text-display");
+        currentPlayerText.textContent = player.name + "'s Turn";
+    }
+
+    const displayWinner = (player) => {
+        const textDisplay = document.querySelector(".text-display");
+        textDisplay.textContent = player.name + " Wins!!!";
+    }
+
+    const displayTie = () => {
+        const textDisplay = document.querySelector(".text-display");
+        textDisplay.textContent = "The game is a tie!";
+    }
+
+    return {displayGameboard, showPlayerPrompt, hidePlayerPrompt, clearPlayerPrompt, displayCurrentPlayer, displayWinner, displayTie};
 })();
 
-const startButton = document.querySelector(".start-game");
-startButton.addEventListener("click", () => {displayController.showPlayerPrompt()});
-const submitPlayerInfo = document.querySelector(".submit-player");
-displayController.displayGameboard();
-const game = PlayGame();
-submitPlayerInfo.addEventListener("click", () => {
-    game.addPlayers();
-    const nameInput = document.querySelector("#player-name");
-    nameInput.value = "";
-});
-//game.startGame();
+
+
+const buildPage = () => {
+    const startButton = document.querySelector(".start-game");
+    startButton.addEventListener("click", () => {
+        game = PlayGame();
+        game.startGame();
+    });
+}
+
+
+buildPage();
