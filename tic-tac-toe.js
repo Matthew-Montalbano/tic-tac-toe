@@ -46,9 +46,7 @@ const gameboard = (() => {
 
 
 const Player = (name, symbol) => {
-    this.name = name;
-    this.symbol = symbol;
-    return {name, symbol};
+    return { name, symbol };
 }
 
 
@@ -111,13 +109,13 @@ const PlayGame = () => {
 
     const nextTurn = () => {
         numTurns++;
+        console.log(numTurns);
         if (gameboard.checkForWin()) {
             removeClickListeners();
             displayController.displayWinner(currentPlayer);
             return;
         }
         if (numTurns > 9) {
-            removeClickListeners();
             displayController.displayTie();
             return;
         }
@@ -132,7 +130,6 @@ const PlayGame = () => {
     const removeClickListeners = () => {
         const squares = document.querySelectorAll(".board-square");
         squares.forEach(square => {
-            console.log('a');
             square.removeEventListener("click", fillPosition);
         });
     }
@@ -196,9 +193,16 @@ const displayController = (() => {
 const buildPage = () => {
     const startButton = document.querySelector(".start-game");
     startButton.addEventListener("click", () => {
+        createFreshHTMLBoard();
         game = PlayGame();
         game.startGame();
     });
+}
+
+const createFreshHTMLBoard = () => {
+    let oldGameboard = document.querySelector(".gameboard");
+    let newGameboard = oldGameboard.cloneNode(true);
+    oldGameboard.parentNode.replaceChild(newGameboard, oldGameboard);
 }
 
 

@@ -1,3 +1,7 @@
+body {
+    background-color: rgba(252, 100, 40, 0.219);
+}
+
 .main {
     display: flex;
     flex-direction: column;
@@ -6,12 +10,15 @@
 
 .text-display {
     margin-top: 50px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(90, 189, 247);
+    font-size: 3em;
 }
 
 .gameboard {
     display: flex;
     flex-direction: column;
-    margin-top: 80px;
+    margin-top: 50px;
 }
 
 .board-row {
@@ -30,6 +37,8 @@
 h3 {
     font-size: 100px;
     margin: 0px;
+    font-family: cursive;
+    color: rgba(255, 45, 45, 0.575);
 }
 
 .start-game {
@@ -37,6 +46,18 @@ h3 {
     height: 50px;
     width: 200px;
     font-size: 1em;
+}
+
+button {
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    border: 1px solid rgb(168, 168, 168)
+}
+
+button:active {
+    background-color: rgb(230, 230, 230);
+    box-shadow: 2px 2px 4px rgb(202, 201, 201);
 }
 
 .popups {
@@ -50,11 +71,11 @@ h3 {
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 200px;
+    top: 220px;
     border: 1px solid black;
     height: 250px;
     width: 500px;
-    background-color:  rgb(187, 247, 179);
+    background-color:  rgb(252, 182, 182);
     border-radius: 20px;
 }
 
@@ -71,6 +92,8 @@ h3 {
     align-self: center;
     margin-top: 30px;
     width: 150px;
+    height: 25px;
+    border: 1px solid rgb(168, 168, 168);
 }
 
 .radio-choices {
